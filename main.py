@@ -1,6 +1,7 @@
 import pygame
 import os
 import random
+from requisicao import send_data
 pygame.init()
 
 # Global Constants
@@ -21,8 +22,8 @@ LARGE_CACTUS = [pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus1.pn
                 pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus2.png")),
                 pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus3.png"))]
 
-BIRD = [pygame.image.load(os.path.join("Assets/Bird", "Bird1.png")),
-        pygame.image.load(os.path.join("Assets/Bird", "Bird2.png"))]
+BIRD = [pygame.image.load(os.path.join("Assets/Bird", "Fly1.png")),
+        pygame.image.load(os.path.join("Assets/Bird", "Fly2.png"))]
 
 CLOUD = pygame.image.load(os.path.join("Assets/Other", "Cloud.png"))
 
@@ -30,9 +31,9 @@ BG = pygame.image.load(os.path.join("Assets/Other", "Track.png"))
 
 
 class Dinosaur:
-    X_POS = 70
+    X_POS = 80
     Y_POS = 310
-    Y_POS_DUCK = 310
+    Y_POS_DUCK = 330
     JUMP_VEL = 8.5
 
     def __init__(self):
@@ -153,7 +154,7 @@ class Bird(Obstacle):
     def __init__(self, image):
         self.type = 0
         super().__init__(image, self.type)
-        self.rect.y = 210
+        self.rect.y = 230
         self.index = 0
 
     def draw(self, SCREEN):
@@ -246,6 +247,7 @@ def menu(death_count):
         if death_count == 0:
             text = font.render("Press any Key to Start", True, (0, 0, 0))
         elif death_count > 0:
+            send_data(points)
             text = font.render("Press any Key to Restart", True, (0, 0, 0))
             score = font.render("Your Score: " + str(points), True, (0, 0, 0))
             scoreRect = score.get_rect()
