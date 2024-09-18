@@ -4,15 +4,15 @@ import random
 pygame.init()
 
 # Global Constants
-SCREEN_HEIGHT = 600
-SCREEN_WIDTH = 1100
+SCREEN_HEIGHT = 480
+SCREEN_WIDTH = 800
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-RUNNING = [pygame.image.load(os.path.join("Assets/Dino", "DinoRun1.png")),
-           pygame.image.load(os.path.join("Assets/Dino", "DinoRun2.png"))]
-JUMPING = pygame.image.load(os.path.join("Assets/Dino", "DinoJump.png"))
-DUCKING = [pygame.image.load(os.path.join("Assets/Dino", "DinoDuck1.png")),
-           pygame.image.load(os.path.join("Assets/Dino", "DinoDuck2.png"))]
+RUNNING = [pygame.image.load(os.path.join("Assets/serjao", "Walk1.png")),
+           pygame.image.load(os.path.join("Assets/serjao", "Walk2.png"))]
+JUMPING = pygame.image.load(os.path.join("Assets/serjao", "Jump.png"))
+DUCKING = [pygame.image.load(os.path.join("Assets/serjao", "Down1.png")),
+           pygame.image.load(os.path.join("Assets/serjao", "Down2.png"))]
 
 SMALL_CACTUS = [pygame.image.load(os.path.join("Assets/Cactus", "SmallCactus1.png")),
                 pygame.image.load(os.path.join("Assets/Cactus", "SmallCactus2.png")),
@@ -30,9 +30,9 @@ BG = pygame.image.load(os.path.join("Assets/Other", "Track.png"))
 
 
 class Dinosaur:
-    X_POS = 80
+    X_POS = 70
     Y_POS = 310
-    Y_POS_DUCK = 340
+    Y_POS_DUCK = 310
     JUMP_VEL = 8.5
 
     def __init__(self):
@@ -153,7 +153,7 @@ class Bird(Obstacle):
     def __init__(self, image):
         self.type = 0
         super().__init__(image, self.type)
-        self.rect.y = 250
+        self.rect.y = 210
         self.index = 0
 
     def draw(self, SCREEN):
