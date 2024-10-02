@@ -1,13 +1,15 @@
 import pygame
 import os
 import random
+import RPi.GPIO as gpio  # Importando RPi.GPIO
+import time
 from requisicao import send_data
 pygame.init()
 
 # Global Constants
 SCREEN_HEIGHT = 480
 SCREEN_WIDTH = 800
-SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),pygame.FULLSCREEN)
 
 RUNNING = [pygame.image.load(os.path.join("Assets/serjao", "Walk1.png")),
            pygame.image.load(os.path.join("Assets/serjao", "Walk2.png"))]
@@ -28,6 +30,15 @@ BIRD = [pygame.image.load(os.path.join("Assets/Bird", "Fly1.png")),
 CLOUD = pygame.image.load(os.path.join("Assets/Other", "Cloud.png"))
 
 BG = pygame.image.load(os.path.join("Assets/Other", "Track.png"))
+
+# Definindo os pinos GPIO para os botões
+pin_a = 5  # Botão A para pular
+pin_b = 6  # Botão B para abaixar
+
+# Configurando o modo dos pinos GPIO
+gpio.setmode(gpio.BCM)
+gpio.setup(pin_a, gpio.IN, pull_up_down=gpio.PUD_UP)
+gpio.setup(pin_b, gpio.IN, pull_up_down=gpio.PUD_UP)
 
 
 class Dinosaur:
@@ -52,7 +63,7 @@ class Dinosaur:
         self.dino_rect.x = self.X_POS
         self.dino_rect.y = self.Y_POS
 
-    def update(self, userInput):
+    def update(self):
         if self.dino_duck:
             self.duck()
         if self.dino_run:
@@ -63,15 +74,16 @@ class Dinosaur:
         if self.step_index >= 10:
             self.step_index = 0
 
-        if userInput[pygame.K_UP] and not self.dino_jump:
+        # Verificando o estado dos botões GPIO
+        if gpio.input(pin_a) == 0 and not self.dino_jump:  # Botão A pressionado
             self.dino_duck = False
             self.dino_run = False
             self.dino_jump = True
-        elif userInput[pygame.K_DOWN] and not self.dino_jump:
+        elif gpio.input(pin_b) == 0 and not self.dino_jump:  # Botão B pressionado
             self.dino_duck = True
             self.dino_run = False
             self.dino_jump = False
-        elif not (self.dino_jump or userInput[pygame.K_DOWN]):
+        elif not (self.dino_jump or gpio.input(pin_b) == 0):
             self.dino_duck = False
             self.dino_run = True
             self.dino_jump = False
@@ -160,7 +172,7 @@ class Bird(Obstacle):
     def draw(self, SCREEN):
         if self.index >= 9:
             self.index = 0
-        SCREEN.blit(self.image[self.index//5], self.rect)
+        SCREEN.blit(self.image[self.index // 5], self.rect)
         self.index += 1
 
 
@@ -205,10 +217,9 @@ def main():
                 run = False
 
         SCREEN.fill((255, 255, 255))
-        userInput = pygame.key.get_pressed()
 
         player.draw(SCREEN)
-        player.update(userInput)
+        player.update()
 
         if len(obstacles) == 0:
             if random.randint(0, 2) == 0:
@@ -246,25 +257,30 @@ def menu(death_count):
         font = pygame.font.Font('freesansbold.ttf', 30)
 
         if death_count == 0:
-            text = font.render("Press any Key to Start", True, (0, 0, 0))
+            text = font.render("Press any Key or Button to Start", True, (0, 0, 0))  # Mensagem indicando que o jogo pode ser iniciado pelos botões
         elif death_count > 0:
-            
-            text = font.render("Press any Key to Restart", True, (0, 0, 0))
+            text = font.render("Press any Key or Button to Restart", True, (0, 0, 0))  # Mensagem de reinício
             score = font.render("Your Score: " + str(points), True, (0, 0, 0))
             scoreRect = score.get_rect()
             scoreRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50)
             SCREEN.blit(score, scoreRect)
+
         textRect = text.get_rect()
         textRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         SCREEN.blit(text, textRect)
         SCREEN.blit(RUNNING[0], (SCREEN_WIDTH // 2 - 20, SCREEN_HEIGHT // 2 - 140))
         pygame.display.update()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 run = False
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN:  # Se qualquer tecla for pressionada
                 main()
+
+        # Verificando os botões GPIO para iniciar/reiniciar o jogo
+        if gpio.input(pin_a) == 0 or gpio.input(pin_b) == 0:  # Se Botão A ou B for pressionado
+            main()
 
 
 menu(death_count=0)
